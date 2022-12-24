@@ -1,0 +1,39 @@
+1
+2
+<ERC721>
+  <k>
+    .
+  </k>
+  <accounts>
+    <account>
+      <accountID>
+        1
+      </accountID>
+      <balance>
+        0
+      </balance>
+    </account> <account>
+      <accountID>
+        2
+      </accountID>
+      <balance>
+        0
+      </balance>
+    </account>
+  </accounts>
+  <nfts>
+    <nft>
+      <nftID>
+        999
+      </nftID>
+      <nftOwner>
+        2
+      </nftOwner>
+    </nft>
+  </nfts>
+  <out>
+    ListItem ( #ostream ( 1 ) )
+    ListItem ( "on" )
+    ListItem ( #buffer ( "" ~> . ) )
+  </out>
+</ERC721>
