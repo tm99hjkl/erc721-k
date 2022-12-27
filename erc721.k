@@ -3,7 +3,7 @@ module ERC721
 
   configuration <ERC721>
                   <caller> 0 </caller>
-                  <k> init ~> $PGM:K </k>
+                  <k> $PGM:K </k>
 
                   <accounts>
                     <account color="red" multiplicity="*" type="Map">
@@ -24,9 +24,11 @@ module ERC721
                   <out color="Orchid" stream="stdout"> .List </out>
                 </ERC721>
 
+  /* ERC-721の関数の引数に使われる型のシノニム */
   syntax Value   ::= Int
   syntax Address ::= Int
 
+  /* AExp: Boolでない帰り値を持つ関数 */
   syntax AExp    ::= Value | Address
                    | "balanceOf" "(" Address ")"
                    | "ownerOf" "(" Value ")"
@@ -36,17 +38,22 @@ module ERC721
                    | "getApproved" "(" Value ")"
                    | "setApprovalForAll" "(" Address "," Bool ")"
 
+  /* BExp: 帰り値がBoolであるような関数 */
   syntax BExp    ::= "throw"
                    | "approve" "(" Address "," Value ")"
                    | "isApprovedForAll" "(" Address "," Address ")"
   
-
-
   syntax Event   ::= "Transfer" "(" Address "," Address "," Value ")"
                    | "Approval" "(" Address "," Address "," Value ")"
                    | "ApprovalForAll" "(" Address "," Address "," Bool ")"
 
 
+  /* 関数を続けて書くための規則．一般的なプログラミング言語であれば自明に以下のような
+     コードは上から下へ実行されるが，Kの出力した処理系ではそこも実装を行わなければな
+     らない．
+     e.g.) transferFrom(from, to, NFT)
+           ownerOf(NFT)
+           ...                                */
   rule <k> S1:Stmt S2:Stmt  =>  S1 ~> S2 ...</k>
 
 
@@ -102,14 +109,17 @@ module ERC721
 
 
   /* utilities for erc721-k */
+  syntax Show    ::= Int | String
   syntax Stmt    ::= AExp 
                    | BExp
                    | Util
+                   | Tests
                    | Stmt Stmt [left]
   syntax Util    ::= "makeAccount" "(" Address ")"
                    | "makeNFT" "(" Value "," Address ")"
-                   | "makeCaller" "(" Address ")"
+                   | "setCaller" "(" Address ")"
                    | "init" [macro]
+                   | "print" "(" Show ")"
 
 
   rule <k> makeAccount(ID)  =>  . ...</k>
@@ -118,7 +128,6 @@ module ERC721
                                    <operate> ID |-> true </operate>
                                    <balance> 0 </balance> 
                                  </account>)
-       <out>... .List       =>  ListItem(ID) ListItem("\n")</out>
 
   rule <k> makeNFT(TokenID, Address)  =>  . ...</k>
        (.Bag                          =>  <nft>
@@ -127,9 +136,42 @@ module ERC721
                                             <nftController> Address </nftController>
                                            </nft>)
 
-  rule <k> makeCaller(Caller)          =>  . ...</k>
-       <caller> _                      =>  Caller</caller>
+  rule <k> setCaller(Caller)          =>  . ...</k>
+       <caller> _                     =>  Caller</caller>
 
-  rule init  => makeAccount(1) makeAccount(2) makeCaller(1) makeNFT(999, 1) 
 
+  rule init  => makeAccount(1) makeAccount(2) setCaller(1) makeNFT(999, 1) 
+
+  rule <k> print(Str) => . ...</k>
+       <out>... .List => ListItem(Str) </out>
+
+  /* test.preamble:  */
+  // syntax Tests ::= "caller" [macro]
+  // rule <k> caller => print(Caller) ...</k>
+  //      <caller> Caller </caller>
+
+  
+  /* test.makeAccount: アカウントを作成して，結果をstdoutに出力するマクロ */
+  syntax Tests ::= "test.makeAccount" "(" Address ")"  [macro]
+  rule test.makeAccount(Address) => 
+    print("account ID: ") 
+    print(Address)
+    print(" is made\n")
+    makeAccount(Address)
+
+  /* test.makeNFT: 作成済みAddressに対してNFTを作成し，stdoutに出力するマクロ */
+  syntax Tests ::= "test.makeNFT" "(" Value "," Address ")"  [macro]
+  rule test.makeNFT(TokenID, Address) => 
+    print("NFT ID: ")
+    print(TokenID)
+    print(", owner: ")
+    print(Address)
+    print(" is made\n")
+    makeNFT(TokenID, Address)
+
+  syntax Tests ::= "test.setCaller" "(" Address ")" [macro]
+  rule test.setCaller(Caller) => 
+    print("caller of function below is ")
+    print(Caller)
+    print("\n")
 endmodule
