@@ -1,38 +1,9 @@
 module ERC721 
   imports DOMAINS
 
-  syntax Value   ::= Int
-  syntax Address ::= Int
-
-  syntax AExp    ::= Value | Address
-                   | "balanceOf" "(" Address ")"
-                   | "ownerOf" "(" Value ")"
-                // | "safeTransferFrom" "(" Address "," Address "," Value" "," Data" )"
-                   | "safeTransferFrom" "(" Address "," Address "," Value")"
-                   | "transferFrom" "(" Address "," Address "," Value")"
-                   | "getApproved" "(" Value ")"
-                   | "setApprovalForAll" "(" Address "," Bool ")"
-
-  syntax BExp    ::= "throw"
-                   | "approve" "(" Address "," Value ")"
-                   | "isApprovedForAll" "(" Address "," Address ")"
-  
-  syntax Util    ::= "makeAccount" "(" Address ")"
-                   | "makeNFT" "(" Value "," Address ")"
-                   | "makeCaller" "(" Address ")"
-
-  syntax Stmt    ::= AExp 
-                   | BExp
-                   | Util
-                   | Stmt Stmt [left]
-
-  syntax Event   ::= "Transfer" "(" Address "," Address "," Value ")"
-                   | "Approval" "(" Address "," Address "," Value ")"
-                   | "ApprovalForAll" "(" Address "," Address "," Bool ")"
-
   configuration <ERC721>
                   <caller> 0 </caller>
-                  <k> $PGM:K </k>
+                  <k> init ~> $PGM:K </k>
 
                   <accounts>
                     <account color="red" multiplicity="*" type="Map">
@@ -53,26 +24,31 @@ module ERC721
                   <out color="Orchid" stream="stdout"> .List </out>
                 </ERC721>
 
+  syntax Value   ::= Int
+  syntax Address ::= Int
+
+  syntax AExp    ::= Value | Address
+                   | "balanceOf" "(" Address ")"
+                   | "ownerOf" "(" Value ")"
+                // | "safeTransferFrom" "(" Address "," Address "," Value" "," Data" )"
+                   | "safeTransferFrom" "(" Address "," Address "," Value")"
+                   | "transferFrom" "(" Address "," Address "," Value")"
+                   | "getApproved" "(" Value ")"
+                   | "setApprovalForAll" "(" Address "," Bool ")"
+
+  syntax BExp    ::= "throw"
+                   | "approve" "(" Address "," Value ")"
+                   | "isApprovedForAll" "(" Address "," Address ")"
+  
+
+
+  syntax Event   ::= "Transfer" "(" Address "," Address "," Value ")"
+                   | "Approval" "(" Address "," Address "," Value ")"
+                   | "ApprovalForAll" "(" Address "," Address "," Bool ")"
+
 
   rule <k> S1:Stmt S2:Stmt  =>  S1 ~> S2 ...</k>
 
-  rule <k> makeAccount(ID)  =>  . ...</k>
-       (.Bag                =>   <account> 
-                                   <accountID> ID </accountID> 
-                                   <operate> ID |-> true </operate>
-                                   <balance> 0 </balance> 
-                                 </account>)
-       <out>... .List       =>  ListItem(ID) ListItem("\n")</out>
-
-  rule <k> makeNFT(TokenID, Address)  =>  . ...</k>
-       (.Bag                          =>  <nft>
-                                            <nftID> TokenID </nftID>
-                                            <nftOwner> Address </nftOwner>
-                                            <nftController> Address </nftController>
-                                           </nft>)
-  
-  rule <k> makeCaller(Caller)          =>  . ...</k>
-       <caller> _                      =>  Caller</caller>
 
 
   /* balanceOf: IDに対応するアカウントが所有するNFTの個数を返す */
@@ -104,6 +80,8 @@ module ERC721
        <nftOwner> Owner </nftOwner>
        <nftController> _               => Approved </nftController>
 
+
+  /* getApproved: TokenIDに対応するNFTの制御者を返す */
   rule <k> getApproved(TokenID)        => Controller ...</k>
        <nftID> TokenID </nftID>
        <nftController> Controller </nftController> 
@@ -116,9 +94,42 @@ module ERC721
        <accountID> Operator </accountID>
        <operate>... .Map => Caller |-> Approved ...</operate>
 
+
   /* Ownerが持つ全てのNFTの制御権がOperatorに譲与されているか */
   rule <k> isApprovedForAll(Owner, Operator)  =>  . ...</k>
        <accountID> Operator </accountID>
        <operate>... Owner |-> true ...</operate>
-       
+
+
+  /* utilities for erc721-k */
+  syntax Stmt    ::= AExp 
+                   | BExp
+                   | Util
+                   | Stmt Stmt [left]
+  syntax Util    ::= "makeAccount" "(" Address ")"
+                   | "makeNFT" "(" Value "," Address ")"
+                   | "makeCaller" "(" Address ")"
+                   | "init" [macro]
+
+
+  rule <k> makeAccount(ID)  =>  . ...</k>
+       (.Bag                =>   <account> 
+                                   <accountID> ID </accountID> 
+                                   <operate> ID |-> true </operate>
+                                   <balance> 0 </balance> 
+                                 </account>)
+       <out>... .List       =>  ListItem(ID) ListItem("\n")</out>
+
+  rule <k> makeNFT(TokenID, Address)  =>  . ...</k>
+       (.Bag                          =>  <nft>
+                                            <nftID> TokenID </nftID>
+                                            <nftOwner> Address </nftOwner>
+                                            <nftController> Address </nftController>
+                                           </nft>)
+
+  rule <k> makeCaller(Caller)          =>  . ...</k>
+       <caller> _                      =>  Caller</caller>
+
+  rule init  => makeAccount(1) makeAccount(2) makeCaller(1) makeNFT(999, 1) 
+
 endmodule
