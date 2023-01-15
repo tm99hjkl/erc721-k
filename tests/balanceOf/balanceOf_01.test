@@ -1,0 +1,8 @@
+makeAccount(1)
+setCaller(1)
+makeAccount(2)
+makeNFT(999, 1)
+makeNFT(99, 1)
+makeNFT(9, 1)
+
+balanceOf(1)

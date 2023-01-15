@@ -1,0 +1,6 @@
+makeAccount(1)
+setCaller(1)
+makeAccount(2)
+makeNFT(999, 1)
+
+approve(10000000, 999)

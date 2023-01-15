@@ -1,0 +1,8 @@
+makeAccount(1)
+setCaller(1)
+makeAccount(2)
+makeNFT(9999, 1)
+makeNFT(999, 1)
+makeNFT(99, 1)
+
+setApprovalForAll(2, true)

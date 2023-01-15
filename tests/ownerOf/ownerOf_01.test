@@ -1,0 +1,4 @@
+makeAccount(1)
+setCaller(1)
+makeNFT(999, 1)
+ownerOf(999)

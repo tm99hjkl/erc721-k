@@ -1,0 +1,37 @@
+<ERC721>
+  <k>
+    1 ~> .
+  </k>
+  <caller>
+    1
+  </caller>
+  <accounts>
+    <account>
+      <accountID>
+        1
+      </accountID>
+      <balance>
+        1
+      </balance>
+      <operate>
+        1 |-> true
+      </operate>
+    </account>
+  </accounts>
+  <nfts>
+    <nft>
+      <nftID>
+        999
+      </nftID>
+      <nftOwner>
+        1
+      </nftOwner>
+      <nftController>
+        1
+      </nftController>
+    </nft>
+  </nfts>
+  <log>
+    Event: 
+  </log>
+</ERC721>
