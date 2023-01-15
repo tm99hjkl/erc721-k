@@ -2,14 +2,14 @@ module ERC721
   imports DOMAINS
 
   configuration <ERC721>
-                  <caller> 0 </caller>
                   <k> $PGM:K </k>
+                  <caller> 0 </caller>
 
                   <accounts>
                     <account color="red" multiplicity="*" type="Map">
-                      <operate> .Map </operate>
                       <accountID> 0 </accountID>
                       <balance> 0 </balance>
+                      <operate> .Map </operate>
                     </account>
                   </accounts>
 
@@ -28,7 +28,7 @@ module ERC721
   syntax Value   ::= Int
   syntax Address ::= Int
 
-  /* AExp: Boolでない帰り値を持つ関数 */
+  /* AExp: Boolでない返り値を持つ関数 */
   syntax AExp    ::= Value | Address
                    | "balanceOf" "(" Address ")"
                    | "ownerOf" "(" Value ")"
@@ -38,7 +38,7 @@ module ERC721
                    | "getApproved" "(" Value ")"
                    | "setApprovalForAll" "(" Address "," Bool ")"
 
-  /* BExp: 帰り値がBoolであるような関数 */
+  /* BExp: 返り値がBoolであるような関数 */
   syntax BExp    ::= "throw"
                    | "approve" "(" Address "," Value ")"
                    | "isApprovedForAll" "(" Address "," Address ")"
@@ -80,7 +80,6 @@ module ERC721
        <nftOwner> From                         => To</nftOwner>
 
   
-  /* approve: toに対しtokenIDに対応するNFTの制御権を譲与する */
   rule <k> approve(Approved, TokenID)  => . ...</k>
        <caller> Owner </caller>
        <nftID> TokenID </nftID>
