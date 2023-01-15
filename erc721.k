@@ -21,6 +21,7 @@ module ERC721
                     </nft>
                   </nfts>
 
+				  <log> Event: </log>
                 </ERC721>
 
   /* ERC-721の関数の引数に使われる型のシノニム */
@@ -46,6 +47,9 @@ module ERC721
                    | "Approval" "(" Address "," Address "," Value ")"
                    | "ApprovalForAll" "(" Address "," Address "," Bool ")"
 
+  syntax EvtLog  ::= "Event: "
+			       | EvtLog Event
+
 
   /* 関数を続けて書くための規則．一般的なプログラミング言語であれば自明に以下のような
      コードは上から下へ実行されるが，Kの出力した処理系ではそこも実装を行わなければな
@@ -54,7 +58,6 @@ module ERC721
            ownerOf(NFT)
            ...                                */
   rule <k> S1:Stmt S2:Stmt  =>  S1 ~> S2 ...</k>
-
 
 
   /* balanceOf: IDに対応するアカウントが所有するNFTの個数を返す */
@@ -77,13 +80,18 @@ module ERC721
   rule <k> safeTransferFrom(From, To, TokenID) => . ...</k>
        <nftID> TokenID </nftID> 
        <nftOwner> From                         => To</nftOwner>
+	   <log> Log                               => Log Transfer(From, To, TokenID)</log>
+	   <balance> Balance                       => Balance -Int 1</balance>
 
   
+  /* approve: Approvedに対しtokenIDに対応するNFTの制御権を譲与する */
   rule <k> approve(Approved, TokenID)  => . ...</k>
+	   <accountID> Approved </accountID>
        <caller> Owner </caller>
        <nftID> TokenID </nftID>
        <nftOwner> Owner </nftOwner>
        <nftController> _               => Approved </nftController>
+	   <log> Log                       => Log Approval(Owner, Approved, TokenID)</log>
 
 
   /* getApproved: TokenIDに対応するNFTの制御者を返す */
@@ -97,7 +105,8 @@ module ERC721
   rule <k> setApprovalForAll(Operator, Approved) => . ...</k>
        <caller> Caller </caller>
        <accountID> Operator </accountID>
-       <operate>... .Map => Caller |-> Approved ...</operate>
+       <operate>... .Map                         => Caller |-> Approved ...</operate>
+	   <log> Log                                 => Log ApprovalForAll(Caller, Operator, Approved)</log>   
 
 
   /* Ownerが持つ全てのNFTの制御権がOperatorに譲与されているか */
@@ -128,7 +137,7 @@ module ERC721
                                             <nftID> TokenID </nftID>
                                             <nftOwner> Address </nftOwner>
                                             <nftController> Address </nftController>
-                                           </nft>)
+                                          </nft>)
 
   rule <k> setCaller(Caller)          =>  . ...</k>
        <caller> _                     =>  Caller</caller>
