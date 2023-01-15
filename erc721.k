@@ -81,7 +81,15 @@ module ERC721
        <nftID> TokenID </nftID> 
        <nftOwner> From                         => To</nftOwner>
 	   <log> Log                               => Log Transfer(From, To, TokenID)</log>
-	   <balance> Balance                       => Balance -Int 1</balance>
+	   <account>
+	     <accountID> From </accountID>
+         <balance> Balance                       => Balance -Int 1</balance>
+	   ...</account>
+	   <account>
+	     <accountID> To </accountID>
+		 <balance> Balance                     => Balance +Int 1</balance>
+	  ...</account>
+
 
   
   /* approve: Approvedに対しtokenIDに対応するNFTの制御権を譲与する */
@@ -104,8 +112,17 @@ module ERC721
    *   譲与するか(isApproved = ture),否か(isApproved = false)を決める */
   rule <k> setApprovalForAll(Operator, Approved) => . ...</k>
        <caller> Caller </caller>
-       <accountID> Operator </accountID>
-       <operate>... .Map                         => Caller |-> Approved ...</operate>
+       <account>
+         <accountID> Operator </accountID>
+         <operate>... .Map                       => Caller |-> Approved ...</operate>
+         ...
+       </account>
+
+       <account>
+         <accountID> Caller </accountID>
+         <operate>... Caller |-> (_ => notBool Approved) ...</operate>
+         ...
+       </account>
 	   <log> Log                                 => Log ApprovalForAll(Caller, Operator, Approved)</log>   
 
 
@@ -138,6 +155,9 @@ module ERC721
                                             <nftOwner> Address </nftOwner>
                                             <nftController> Address </nftController>
                                           </nft>)
+       <accountID> Address </accountID>
+       <balance> Balance              =>  Balance +Int 1</balance>
+     
 
   rule <k> setCaller(Caller)          =>  . ...</k>
        <caller> _                     =>  Caller</caller>
