@@ -1,7 +1,7 @@
 # erc721-k
-Formal specification of ERC-721 in K
+Formal specification of ERC-721 in [K](https://kframework.org/index.html)
 
-# Install K
+# Fast installation of K
 ## Install Nix
 For faster installation, you can use [Nix](https://nixos.org/download.html).
 ```
