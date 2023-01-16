@@ -21,7 +21,7 @@ module ERC721
                     </nft>
                   </nfts>
 
-				  <log> Event: </log>
+                  <log> Event: </log>
                 </ERC721>
 
   /* ERC-721の関数の引数に使われる型のシノニム */
@@ -48,7 +48,7 @@ module ERC721
                    | "ApprovalForAll" "(" Address "," Address "," Bool ")"
 
   syntax EvtLog  ::= "Event: "
-			       | EvtLog Event
+                   | EvtLog Event
 
 
   /* 関数を続けて書くための規則．一般的なプログラミング言語であれば自明に以下のような
@@ -80,26 +80,26 @@ module ERC721
   rule <k> safeTransferFrom(From, To, TokenID) => . ...</k>
        <nftID> TokenID </nftID> 
        <nftOwner> From                         => To</nftOwner>
-	   <log> Log                               => Log Transfer(From, To, TokenID)</log>
-	   <account>
-	     <accountID> From </accountID>
+       <log> Log                               => Log Transfer(From, To, TokenID)</log>
+       <account>
+         <accountID> From </accountID>
          <balance> Balance                       => Balance -Int 1</balance>
-	   ...</account>
-	   <account>
-	     <accountID> To </accountID>
-		 <balance> Balance                     => Balance +Int 1</balance>
-	  ...</account>
+       ...</account>
+       <account>
+         <accountID> To </accountID>
+         <balance> Balance                     => Balance +Int 1</balance>
+      ...</account>
 
 
   
   /* approve: Approvedに対しtokenIDに対応するNFTの制御権を譲与する */
   rule <k> approve(Approved, TokenID)  => . ...</k>
-	   <accountID> Approved </accountID>
+       <accountID> Approved </accountID>
        <caller> Owner </caller>
        <nftID> TokenID </nftID>
        <nftOwner> Owner </nftOwner>
        <nftController> _               => Approved </nftController>
-	   <log> Log                       => Log Approval(Owner, Approved, TokenID)</log>
+       <log> Log                       => Log Approval(Owner, Approved, TokenID)</log>
 
 
   /* getApproved: TokenIDに対応するNFTの制御者を返す */
@@ -123,7 +123,7 @@ module ERC721
          <operate>... Caller |-> (_ => notBool Approved) ...</operate>
          ...
        </account>
-	   <log> Log                                 => Log ApprovalForAll(Caller, Operator, Approved)</log>   
+       <log> Log                                 => Log ApprovalForAll(Caller, Operator, Approved)</log>   
 
 
   /* Ownerが持つ全てのNFTの制御権がOperatorに譲与されているか */
