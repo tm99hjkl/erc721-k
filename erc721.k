@@ -78,21 +78,25 @@ module ERC721
 
   /* safeTransferFrom: TokenIDに対応するNFTをFromからToに送信する*/
   rule <k> safeTransferFrom(From, To, TokenID) => . ...</k>
-       <nftID> TokenID </nftID> 
-       <nftOwner> From                         => To</nftOwner>
-       <log> Log                               => Log Transfer(From, To, TokenID)</log>
+       <nft>
+         <nftID> TokenID </nftID> 
+         <nftOwner> From                     => To</nftOwner>
+         ...
+       </nft>
        <account>
          <accountID> From </accountID>
-         <balance> Balance                       => Balance -Int 1</balance>
-       ...</account>
+         <balance> Balance1                  => Balance1 -Int 1</balance>
+         ...
+       </account>
        <account>
          <accountID> To </accountID>
-         <balance> Balance                     => Balance +Int 1</balance>
-      ...</account>
-
+         <balance> Balance2                  => Balance2 +Int 1</balance>
+         ...
+       </account>
+       <log> Log                             => Log Transfer(From, To, TokenID)</log>
 
   
-  /* approve: Approvedに対しtokenIDに対応するNFTの制御権を譲与する */
+  /* approve: Approvedに対しTokenIDに対応するNFTの制御権を譲与する */
   rule <k> approve(Approved, TokenID)  => . ...</k>
        <accountID> Approved </accountID>
        <caller> Owner </caller>
@@ -117,7 +121,6 @@ module ERC721
          <operate>... .Map                       => Caller |-> Approved ...</operate>
          ...
        </account>
-
        <account>
          <accountID> Caller </accountID>
          <operate>... Caller |-> (_ => notBool Approved) ...</operate>
